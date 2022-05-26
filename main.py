@@ -8,14 +8,14 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 def main():
     train_datagen = ImageDataGenerator(
-        rescale=1./255,
+        rescale=1. / 255,
         shear_range=0.2,
         zoom_range=0.2,
         horizontal_flip=True)
     training_set = train_datagen.flow_from_directory(
         'training_set', target_size=(64, 64), batch_size=32, class_mode='categorical')
 
-    test_datagen = ImageDataGenerator(rescale=1. / 255)
+    test_datagen = ImageDataGenerator(rescale=1./255)
     test_set = test_datagen.flow_from_directory('test_set', target_size=(64, 64), batch_size=32, class_mode='categorical')
 
     cnn = tf.keras.models.Sequential()
@@ -26,6 +26,7 @@ def main():
 
     cnn.add(tf.keras.layers.Dropout(0.5))
     cnn.add(tf.keras.layers.Flatten())
+    cnn.add(tf.keras.layers.Dense(units=128, activation='relu'))
     cnn.add(tf.keras.layers.Dense(units=9, activation='softmax'))
     cnn.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy'])
     cnn.fit(x=training_set, validation_data=test_set, epochs=20)
@@ -35,7 +36,9 @@ def main():
     test_image = np.expand_dims(test_image, axis=0)
     result = cnn.predict(test_image)
     training_set.class_indices
+    cnn.save("model")
 
+    #reconstructed_model = tf.keras.models.load_model("my_model")
     if result[0][0] == 1:
         print('Agaricus')
     elif result[0][1] == 1:
