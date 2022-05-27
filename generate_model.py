@@ -6,9 +6,9 @@ from PIL import ImageFile
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
-def main():
+def generate_model():
     train_datagen = ImageDataGenerator(
-        rescale=1. / 255,
+        rescale=1./255,
         shear_range=0.2,
         zoom_range=0.2,
         horizontal_flip=True)
@@ -29,35 +29,35 @@ def main():
     cnn.add(tf.keras.layers.Dense(units=128, activation='relu'))
     cnn.add(tf.keras.layers.Dense(units=9, activation='softmax'))
     cnn.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy'])
-    cnn.fit(x=training_set, validation_data=test_set, epochs=20)
+    cnn.fit(x=training_set, validation_data=test_set, epochs=50)
+    cnn.save("model.h5")
 
-    test_image = image.load_img('sample_images/1.jpg', target_size=(64, 64))
+    test_image = image.load_img('1.jpg', target_size=(64, 64))
     test_image = image.img_to_array(test_image)
     test_image = np.expand_dims(test_image, axis=0)
     result = cnn.predict(test_image)
-    training_set.class_indices
-    cnn.save("model")
 
-    #reconstructed_model = tf.keras.models.load_model("my_model")
+    name = ''
     if result[0][0] == 1:
-        print('Agaricus')
+        name = 'Agaricus'
     elif result[0][1] == 1:
-        print('Amanita')
+        name = 'Amanita'
     elif result[0][2] == 1:
-        print('Boletus')
+        name = 'Boletus'
     elif result[0][3] == 1:
-        print('Cortinarius')
+        name = 'Cortinarius'
     elif result[0][4] == 1:
-        print("Entoloma")
+        name = 'Entoloma'
     elif result[0][5] == 1:
-        print("Hygrocybe")
+        name = 'Hygrocybe'
     elif result[0][6] == 1:
-        print("Lactarius")
+        name = 'Lactarius'
     elif result[0][7] == 1:
-        print("Russula")
+        name = 'Russula'
     elif result[0][8] == 1:
-        print("Suillus")
+        name = 'Suillus'
+
+    print(name)
 
 
-
-main()
+generate_model()
