@@ -72,15 +72,9 @@ class MyWindow(QMainWindow):
         elif result[0][3] == 1:
             name = 'Cortinarius'
         elif result[0][4] == 1:
-            name = 'Entoloma'
-        elif result[0][5] == 1:
-            name = 'Hygrocybe'
-        elif result[0][6] == 1:
             name = 'Lactarius'
-        elif result[0][7] == 1:
+        elif result[0][5] == 1:
             name = 'Russula'
-        elif result[0][8] == 1:
-            name = 'Suillus'
 
         self.out_label.setText(name)
 

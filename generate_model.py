@@ -1,5 +1,7 @@
 import tensorflow as tf
 import numpy as np
+from keras.layers import Conv2D, Activation, MaxPooling2D, Flatten, Dense, Dropout
+from keras.models import Sequential
 from keras.preprocessing import image
 from keras.preprocessing.image import ImageDataGenerator
 from PIL import ImageFile
@@ -27,37 +29,10 @@ def generate_model():
     cnn.add(tf.keras.layers.Dropout(0.5))
     cnn.add(tf.keras.layers.Flatten())
     cnn.add(tf.keras.layers.Dense(units=128, activation='relu'))
-    cnn.add(tf.keras.layers.Dense(units=9, activation='softmax'))
+    cnn.add(tf.keras.layers.Dense(units=6, activation='softmax'))
     cnn.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy'])
-    cnn.fit(x=training_set, validation_data=test_set, epochs=50)
+    cnn.fit(x=training_set, validation_data=test_set, epochs=30)
     cnn.save("model.h5")
-
-    test_image = image.load_img('1.jpg', target_size=(64, 64))
-    test_image = image.img_to_array(test_image)
-    test_image = np.expand_dims(test_image, axis=0)
-    result = cnn.predict(test_image)
-
-    name = ''
-    if result[0][0] == 1:
-        name = 'Agaricus'
-    elif result[0][1] == 1:
-        name = 'Amanita'
-    elif result[0][2] == 1:
-        name = 'Boletus'
-    elif result[0][3] == 1:
-        name = 'Cortinarius'
-    elif result[0][4] == 1:
-        name = 'Entoloma'
-    elif result[0][5] == 1:
-        name = 'Hygrocybe'
-    elif result[0][6] == 1:
-        name = 'Lactarius'
-    elif result[0][7] == 1:
-        name = 'Russula'
-    elif result[0][8] == 1:
-        name = 'Suillus'
-
-    print(name)
 
 
 generate_model()
