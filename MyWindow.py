@@ -17,8 +17,8 @@ class MyWindow(QMainWindow):
         # Set default stuff here
         # --------------------------
 
-        self.setWindowTitle("My first GUI ;)")
-        self.out_label.setText("sample text")
+        self.setWindowTitle("Mushroom classifier")
+        self.out_label.setText("")
         self.image_preview.setPixmap(QtGui.QPixmap("images/default.png"))
 
         # --------------------------
@@ -56,25 +56,23 @@ class MyWindow(QMainWindow):
             self.out_label.setText("🥶🥶🥶🥶🥶")
             return
 
-        cnn = tf.keras.models.load_model("model.h5")
+        cnn = tf.keras.models.load_model("model_from_scratch.h5")
         test_image = image.load_img(self.img_path, target_size=(64, 64))
         test_image = image.img_to_array(test_image)
         test_image = np.expand_dims(test_image, axis=0)
+        test_image = test_image/255
         result = cnn.predict(test_image)
+        answer = np.argmax(result, axis=1)
 
         name = ''
-        if result[0][0] == 1:
-            name = 'Agaricus'
-        elif result[0][1] == 1:
+        if answer == 0:
             name = 'Amanita'
-        elif result[0][2] == 1:
+        elif answer == 1:
             name = 'Boletus'
-        elif result[0][3] == 1:
-            name = 'Cortinarius'
-        elif result[0][4] == 1:
+        elif answer == 2:
+            name = 'Cantharellus'
+        elif answer == 3:
             name = 'Lactarius'
-        elif result[0][5] == 1:
-            name = 'Russula'
 
         self.out_label.setText(name)
 
