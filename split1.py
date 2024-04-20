@@ -2,7 +2,7 @@ import os
 import shutil
 import random
 
-source_dir = "small_dataset"
+source_dir = "dataset"
 destination_dir = "splits/split1"
 if not os.path.exists(destination_dir):
     os.makedirs(destination_dir)

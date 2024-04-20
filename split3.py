@@ -1,7 +1,7 @@
 import os
-import shutil
 import random
-import sys
+import shutil
+
 import helpers
 
 
@@ -65,3 +65,5 @@ replace_val_set(os.path.join(tmp_directory, "val"))
 aug_count = 5
 augment_and_equalize_classes(source_directory, target_directory, aug_count)
 normalize_classes(target_directory)
+if os.path.exists(tmp_directory):
+    shutil.rmtree(tmp_directory)

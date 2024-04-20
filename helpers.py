@@ -1,6 +1,6 @@
 import math
-import cv2
 import os
+
 import numpy as np
 from PIL import Image
 from keras.src.legacy.preprocessing.image import ImageDataGenerator
