@@ -59,3 +59,29 @@ def augment_and_equalize_images_set(image_set_path, output_set_path, aug_count, 
             augment_and_save_image(img_path, output_set_path, aug_count + additional_aug)
         except Exception as e:
             print(f"Error processing {img_path}: {e}")
+
+
+def load_data(data_dir, image_size):
+    train_datagen = ImageDataGenerator(rescale=1./255)
+    val_datagen = ImageDataGenerator(rescale=1./255)
+    test_datagen = ImageDataGenerator(rescale=1./255)
+
+    train_generator = train_datagen.flow_from_directory(
+        os.path.join(data_dir, 'train'),
+        target_size=(image_size, image_size),
+        batch_size=32,
+        class_mode='categorical')
+
+    validation_generator = val_datagen.flow_from_directory(
+        os.path.join(data_dir, 'val'),
+        target_size=(image_size, image_size),
+        batch_size=32,
+        class_mode='categorical')
+
+    test_generator = test_datagen.flow_from_directory(
+        os.path.join(data_dir, 'test'),
+        target_size=(image_size, image_size),
+        batch_size=32,
+        class_mode='categorical')
+
+    return train_generator, validation_generator, test_generator

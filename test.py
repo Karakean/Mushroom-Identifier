@@ -1,42 +1,38 @@
-import numpy as np
 import os
-from PIL import Image
-from keras.src.legacy.preprocessing.image import ImageDataGenerator
 
-# print("IMAGE 1")
-# print(np.array(Image.open("splits/split1/test/Amanita/002_pJY3-9Ttfto.jpg")))
-# print("IMAGE 2")
-# print(np.array(Image.open("splits/tmp/test/Amanita/002_pJY3-9Ttfto.jpg")))
+from sklearn.metrics import confusion_matrix, classification_report
+import tensorflow as tf
+import numpy as np
 
-# image = Image.open("002_pJY3-9Ttfto.jpg")
-# image_array = np.array(image)
-# print("IMAGE 1")
-# print(image_array)
-# mean = np.mean(image_array)
-# std_dev = np.std(image_array)
-# image_array = (image_array - mean) / std_dev
-# print("IMAGE 2")
-# print(image_array)
-# new_image = Image.fromarray(image_array)
-# new_image.save("test.jpg")
-
-image = Image.open("test_img.jpg")
-image_array = np.array(image)
-
-x = np.expand_dims(image_array, axis=0)
-
-datagen = ImageDataGenerator(
-    rescale=1. / 255,
-    shear_range=0.2,
-    zoom_range=0.2,
-    horizontal_flip=True
-)
-
-original_image_path = os.path.join("tmp", "original_test_img.jpg")
-image.save(original_image_path)
-
-for i, batch in enumerate(datagen.flow(x, batch_size=1, save_to_dir="tmp", save_prefix="augmented", save_format='jpg')):
-    if i >= 5:
-        break
+from helpers import load_data
 
 
+def main():
+    splits_dir = 'splits'
+    splits = ['split1', 'split2', 'split3']
+    image_size = 224
+    source_dir = "dataset"
+    genuses = [genus for genus in os.listdir(source_dir) if not genus.startswith('.')]
+
+    for i, split in enumerate(splits):
+        loaded_model = tf.keras.models.load_model(f"MODEL{i + 1}.keras")
+        data_dir = os.path.join(splits_dir, split)
+        train_generator, validation_generator, test_generator = load_data(data_dir, image_size)
+
+        test_steps = test_generator.samples // test_generator.batch_size
+        if test_generator.samples % test_generator.batch_size != 0:
+            test_steps += 1
+
+        loss, accuracy = loaded_model.evaluate(test_generator)
+        print(f"Test Accuracy for MODEL{i + 1} ({split}): {accuracy}")
+        print(f"Test Loss for MODEL{i + 1} ({split}): {loss}")
+        predictions = loaded_model.predict(test_generator)
+        predicted_classes = np.argmax(predictions, axis=1)
+        print(f"Confusion Matrix for MODEL{i + 1} ({split}):")
+        print(confusion_matrix(validation_generator.classes, predicted_classes))
+        print(f"\nClassification Report for MODEL{i + 1} ({split}):")
+        print(classification_report(validation_generator.classes, predicted_classes, target_names=genuses))
+
+
+if __name__ == "__main__":
+    main()
