@@ -25,7 +25,7 @@ def build_model(image_size, classes_number):
     cnn.add(tf.keras.layers.Dense(units=512, activation='relu'))
     # cnn.add(tf.keras.layers.Dropout(0.5))
     cnn.add(tf.keras.layers.Dense(units=classes_number, activation='softmax'))
-    cnn.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy', 'f1_score'])
+    cnn.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
 
     return cnn
 
