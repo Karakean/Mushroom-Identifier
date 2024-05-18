@@ -1,99 +1,75 @@
 import numpy as np
 import tensorflow as tf
-from PIL import ImageFile
-# from keras.src.legacy.preprocessing import image
-
-ImageFile.LOAD_TRUNCATED_IMAGES = True
+import sys
 from PyQt5 import QtGui, QtCore
-from PyQt5.QtWidgets import QDialog, QFileDialog, QApplication, QMainWindow
-from PyQt5.QtGui import QMovie
+from PyQt5.QtCore import QTimer
+from PyQt5.QtWidgets import QMainWindow, QFileDialog, QApplication
+from PyQt5.QtGui import QPixmap, QIcon, QMovie
 from PyQt5.uic import loadUi
 
 
 class MyWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, model_path):
         super(MyWindow, self).__init__()
         loadUi("gui/gui.ui", self)
-
-        # Set default stuff here
-        # --------------------------
-
-        self.setWindowTitle("Mushroom classifier")
-        self.out_label.setText("")
-        self.image_preview.setPixmap(QtGui.QPixmap("images/logo.png"))
-
-        # --------------------------
-
-        self.setStyleSheet("background-color: rgb(20, 20, 20);"
-                           "color: rgb(255, 255, 255);"
-                           "font-family: \"Comic Sans MS\", \"Comic Sans\", cursive;")
+        self.setWindowTitle("Mushroom Classifier")
+        self.setStyleSheet(
+            "background-color: rgb(20, 20, 20); color: rgb(255, 255, 255); font-family: 'Open Sans', cursive;")
         self.out_label.setStyleSheet("font-size: 18px;")
-        self.img_path = ""
-
-        self.movie = QMovie("gui/wallow.gif")
-        self.movie.start()
-
-        self.select_button.clicked.connect(self.select_file)
         self.select_button.setStyleSheet("background-color: rgb(40, 40, 40);")
-        self.identify_button.clicked.connect(self.process)
         self.identify_button.setStyleSheet("background-color: rgb(40, 40, 40);")
+        self.movie = None
+        self.img_path = None
+        self.model = model_path
+        self.select_button.clicked.connect(self.select_file)
+        self.identify_button.clicked.connect(self.process)
+        self.init_ui()
 
-        app_icon = QtGui.QIcon()
-        app_icon.addFile('gui/wallow.gif', QtCore.QSize(16, 16))
-        app_icon.addFile('gui/wallow.gif', QtCore.QSize(24, 24))
-        app_icon.addFile('gui/wallow.gif', QtCore.QSize(32, 32))
-        app_icon.addFile('gui/wallow.gif', QtCore.QSize(48, 48))
-        app_icon.addFile('gui/wallow.gif', QtCore.QSize(256, 256))
-
+    def init_ui(self):
+        self.movie = QMovie("gui/wallow.gif")
+        self.image_preview.setMovie(self.movie)
+        self.movie.start()
+        app_icon = QIcon()
+        for size in [16, 24, 32, 48, 256]:
+            app_icon.addFile('gui/logo.png', QtCore.QSize(size, size))
         self.setWindowIcon(app_icon)
+        self.out_label.setText("Welcome to Mushroom Classifier!\nPlease upload a mushroom image.")
         self.show()
 
     def process(self):
-        if self.img_path == "":
-            self.shroom_laugh_l.setMovie(self.movie)
-            self.shroom_laugh_r.setMovie(self.movie)
-            self.movie.start()
-            self.image_preview.setPixmap(QtGui.QPixmap("images/logo.png").scaledToWidth(200))
-            self.out_label.setText("🥶🥶🥶🥶🥶")
+        if not self.img_path:
+            self.out_label.setText("No image selected! Please select an image.")
             return
-
         self.out_label.setText("Processing image...")
-        self.update_image()
-        cnn = tf.keras.models.load_model("MODEL3.keras")
+        QApplication.processEvents()
+        QTimer.singleShot(25, self.predict)
+
+    def predict(self):
+        cnn = tf.keras.models.load_model(self.model)
         test_image = tf.keras.utils.load_img(self.img_path, target_size=(224, 224))
         test_image = tf.keras.utils.img_to_array(test_image)
         test_image = np.expand_dims(test_image, axis=0)
-        test_image = test_image / 255
+        test_image /= 255.0
         result = cnn.predict(test_image)
-        answer = np.argmax(result, axis=1)
-
-        name = ''
-        if answer == 0:
-            name = 'Amanita'
-        elif answer == 1:
-            name = 'Boletus'
-        elif answer == 2:
-            name = 'Cantharellus'
-        elif answer == 3:
-            name = 'Lactarius'
-
-        self.out_label.setText(name)
+        name_map = {0: 'Amanita', 1: 'Boletus', 2: 'Cantharellus', 3: 'Lactarius'}
+        name = name_map.get(np.argmax(result), 'Unknown')
+        self.out_label.setText(f"Mushroom classified as: {name}\nYou can select another image.")
 
     def select_file(self):
         fname, _ = QFileDialog.getOpenFileName(self, "Select image", "C:/", "Images (*.jpg *.png *.bmp)")
+        if fname:
+            self.img_path = fname
+            self.image_preview.setPixmap(QPixmap(fname))
+            self.movie.stop()
+            self.out_label.setText("Image loaded successfully.\nClick \"Identify\" button to identify this mushroom.")
+        else:
+            self.img_path = None
+            self.out_label.setText("No image selected")
+            self.image_preview.setMovie(self.movie)
+            self.movie.start()
 
-        self.shroom_laugh_l.setMovie(None)
-        self.shroom_laugh_r.setMovie(None)
-        self.movie.stop()
 
-        if fname == "":
-            return
-
-        self.out_label.setPixmap(QtGui.QPixmap(None))
-        self.out_label.setText("Image loaded")
-        self.img_path = fname
-        self.update_image()
-
-    def update_image(self):
-        # Kiedys tu bylo wiecej, moze ta funkcja sie jeszcze przyda
-        self.image_preview.setPixmap(QtGui.QPixmap(self.img_path))
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    win = MyWindow()
+    sys.exit(app.exec_())

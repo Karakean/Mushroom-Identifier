@@ -5,8 +5,9 @@ import MyWindow
 
 
 def window():
+    model = "MODEL3.keras"
     app = QApplication(sys.argv)
-    win = MyWindow.MyWindow()
+    win = MyWindow.MyWindow(model)
     sys.exit(app.exec_())
 
 
