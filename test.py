@@ -71,6 +71,28 @@ def test_basic_models(splits_dir, splits, image_size, genuses):
         plot_metrics(losses[i], splits, f'Testing Loss on {label} Set Across Models', 'Loss')
 
 
+def test_ensemble_models(models, genuses, generator):
+    predictions = ensemble_predictions(models, generator)
+    predicted_classes = np.argmax(predictions, axis=1)
+    cm = confusion_matrix(generator.classes, predicted_classes)
+    cr = classification_report(generator.classes, predicted_classes, target_names=genuses, output_dict=True)
+    plot_confusion_matrix(cm, genuses, f"Confusion Matrix for model ensemble")
+    plot_classification_report(cr, genuses, f"Classification Report for model ensemble")
+
+
+def ensemble_predictions(models, generator):
+    total_predictions = None
+    for model in models:
+        loaded_model = tf.keras.models.load_model(model)
+        predictions = loaded_model.predict(generator, verbose=0)
+        if total_predictions is None:
+            total_predictions = predictions
+        else:
+            total_predictions += predictions
+    average_predictions = total_predictions / len(models)
+    return average_predictions
+
+
 def main():
     splits_dir = 'splits'
     splits = ['split1', 'split2', 'split3']
@@ -78,7 +100,9 @@ def main():
     source_dir = "dataset"
     genuses = [genus for genus in os.listdir(source_dir) if not genus.startswith('.')]
     test_basic_models(splits_dir, splits, image_size, genuses)
-    # _, _, generator = load_data("tmp/data", image_size, shuffle=False)
+    _, _, generator = load_data("splits/split2", image_size, shuffle=False)
+    model_ensemble_set = ["MODEL1.keras", "MODEL2.keras", "MODEL3.keras"]
+    test_ensemble_models(model_ensemble_set, genuses, generator)
     # test_model("test_model.keras", genuses, generator)
 
 
