@@ -26,6 +26,8 @@ def build_model(image_size, classes_number):
     # cnn.add(tf.keras.layers.Dropout(0.5))
     cnn.add(tf.keras.layers.Dense(units=classes_number, activation='softmax'))
     cnn.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+    # cnn.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy', 'f1_score', 'precision_score',
+    #                                                                         'recall_score'])
 
     return cnn
 
@@ -67,7 +69,9 @@ def main():
         train_generator, validation_generator, test_generator = load_data(data_dir, image_size)
         model = build_model(image_size, classes_number)
 
-        checkpoint = ModelCheckpoint(f"MODEL{i+1}.keras", monitor='val_accuracy', save_best_only=True, mode='max')
+        model_name = f"MODEL{i+1}.keras"
+        key_metric = 'val_accuracy'
+        checkpoint = ModelCheckpoint(model_name, monitor=key_metric, save_best_only=True, mode='max')
         result = model.fit(train_generator, validation_data=validation_generator, epochs=epochs_number, callbacks=[checkpoint])
 
         make_plots(result, f"MODEL{i+1} created from {split}")

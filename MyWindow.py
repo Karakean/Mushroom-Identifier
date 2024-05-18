@@ -12,14 +12,14 @@ from PyQt5.uic import loadUi
 class MyWindow(QMainWindow):
     def __init__(self):
         super(MyWindow, self).__init__()
-        loadUi("gui.ui", self)
+        loadUi("gui/gui.ui", self)
 
         # Set default stuff here
         # --------------------------
 
         self.setWindowTitle("Mushroom classifier")
         self.out_label.setText("")
-        self.image_preview.setPixmap(QtGui.QPixmap("images/default.png"))
+        self.image_preview.setPixmap(QtGui.QPixmap("images/logo.png"))
 
         # --------------------------
 
@@ -29,7 +29,7 @@ class MyWindow(QMainWindow):
         self.out_label.setStyleSheet("font-size: 18px;")
         self.img_path = ""
 
-        self.movie = QMovie("images/laugh.gif")
+        self.movie = QMovie("gui/wallow.gif")
         self.movie.start()
 
         self.select_button.clicked.connect(self.select_file)
@@ -38,11 +38,11 @@ class MyWindow(QMainWindow):
         self.identify_button.setStyleSheet("background-color: rgb(40, 40, 40);")
 
         app_icon = QtGui.QIcon()
-        app_icon.addFile('images/default.gif', QtCore.QSize(16, 16))
-        app_icon.addFile('images/default.gif', QtCore.QSize(24, 24))
-        app_icon.addFile('images/default.gif', QtCore.QSize(32, 32))
-        app_icon.addFile('images/default.gif', QtCore.QSize(48, 48))
-        app_icon.addFile('images/default.gif', QtCore.QSize(256, 256))
+        app_icon.addFile('images/wallow.gif', QtCore.QSize(16, 16))
+        app_icon.addFile('images/wallow.gif', QtCore.QSize(24, 24))
+        app_icon.addFile('images/wallow.gif', QtCore.QSize(32, 32))
+        app_icon.addFile('images/wallow.gif', QtCore.QSize(48, 48))
+        app_icon.addFile('images/wallow.gif', QtCore.QSize(256, 256))
 
         self.setWindowIcon(app_icon)
         self.show()
@@ -52,11 +52,11 @@ class MyWindow(QMainWindow):
             self.shroom_laugh_l.setMovie(self.movie)
             self.shroom_laugh_r.setMovie(self.movie)
             self.movie.start()
-            self.image_preview.setPixmap(QtGui.QPixmap("images/mm.png").scaledToWidth(200))
+            self.image_preview.setPixmap(QtGui.QPixmap("images/logo.png").scaledToWidth(200))
             self.out_label.setText("🥶🥶🥶🥶🥶")
             return
 
-        cnn = tf.keras.models.load_model("model_from_scratch.h5")
+        cnn = tf.keras.models.load_model("MODEL3.keras")
         test_image = image.load_img(self.img_path, target_size=(64, 64))
         test_image = image.img_to_array(test_image)
         test_image = np.expand_dims(test_image, axis=0)

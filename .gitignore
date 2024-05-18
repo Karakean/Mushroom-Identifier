@@ -345,3 +345,5 @@ small_dataset/*
 other_data/*
 splits/*
 *.keras
+
+!gui/*
