@@ -1,7 +1,8 @@
 import numpy as np
 import tensorflow as tf
 from PIL import ImageFile
-from keras_preprocessing import image
+# from keras.src.legacy.preprocessing import image
+
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 from PyQt5 import QtGui, QtCore
 from PyQt5.QtWidgets import QDialog, QFileDialog, QApplication, QMainWindow
@@ -38,11 +39,11 @@ class MyWindow(QMainWindow):
         self.identify_button.setStyleSheet("background-color: rgb(40, 40, 40);")
 
         app_icon = QtGui.QIcon()
-        app_icon.addFile('images/wallow.gif', QtCore.QSize(16, 16))
-        app_icon.addFile('images/wallow.gif', QtCore.QSize(24, 24))
-        app_icon.addFile('images/wallow.gif', QtCore.QSize(32, 32))
-        app_icon.addFile('images/wallow.gif', QtCore.QSize(48, 48))
-        app_icon.addFile('images/wallow.gif', QtCore.QSize(256, 256))
+        app_icon.addFile('gui/wallow.gif', QtCore.QSize(16, 16))
+        app_icon.addFile('gui/wallow.gif', QtCore.QSize(24, 24))
+        app_icon.addFile('gui/wallow.gif', QtCore.QSize(32, 32))
+        app_icon.addFile('gui/wallow.gif', QtCore.QSize(48, 48))
+        app_icon.addFile('gui/wallow.gif', QtCore.QSize(256, 256))
 
         self.setWindowIcon(app_icon)
         self.show()
@@ -56,11 +57,13 @@ class MyWindow(QMainWindow):
             self.out_label.setText("🥶🥶🥶🥶🥶")
             return
 
+        self.out_label.setText("Processing image...")
+        self.update_image()
         cnn = tf.keras.models.load_model("MODEL3.keras")
-        test_image = image.load_img(self.img_path, target_size=(64, 64))
-        test_image = image.img_to_array(test_image)
+        test_image = tf.keras.utils.load_img(self.img_path, target_size=(224, 224))
+        test_image = tf.keras.utils.img_to_array(test_image)
         test_image = np.expand_dims(test_image, axis=0)
-        test_image = test_image/255
+        test_image = test_image / 255
         result = cnn.predict(test_image)
         answer = np.argmax(result, axis=1)
 
@@ -86,7 +89,6 @@ class MyWindow(QMainWindow):
         if fname == "":
             return
 
-        self.file_path.setText(fname)
         self.out_label.setPixmap(QtGui.QPixmap(None))
         self.out_label.setText("Image loaded")
         self.img_path = fname

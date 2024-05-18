@@ -59,7 +59,7 @@ def test_basic_models(splits_dir, splits, image_size, genuses):
     generator_labels = ['Training', 'Validation', 'Test']
     for i, split in enumerate(splits):
         data_dir = os.path.join(splits_dir, split)
-        generators = load_data(data_dir, image_size)
+        generators = load_data(data_dir, image_size, shuffle=False)
         for j, generator in enumerate(generators):
             loss, accuracy = test_model(f"MODEL{i + 1}.keras", genuses, generators[j],
                                         f" for {generator_labels[j]} Set")
@@ -78,7 +78,7 @@ def main():
     source_dir = "dataset"
     genuses = [genus for genus in os.listdir(source_dir) if not genus.startswith('.')]
     test_basic_models(splits_dir, splits, image_size, genuses)
-    # _, _, generator = load_data("tmp/data", image_size)
+    # _, _, generator = load_data("tmp/data", image_size, shuffle=False)
     # test_model("test_model.keras", genuses, generator)
 
 
