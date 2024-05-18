@@ -72,7 +72,9 @@ def main():
         model_name = f"MODEL{i+1}.keras"
         key_metric = 'val_accuracy'
         checkpoint = ModelCheckpoint(model_name, monitor=key_metric, save_best_only=True, mode='max')
-        result = model.fit(train_generator, validation_data=validation_generator, epochs=epochs_number, callbacks=[checkpoint])
+        earlystop = tf.keras.callbacks.EarlyStopping(monitor=key_metric, patience=5)
+        result = model.fit(train_generator, validation_data=validation_generator, epochs=epochs_number,
+                           callbacks=[checkpoint, earlystop])
 
         make_plots(result, f"MODEL{i+1} created from {split}")
 
