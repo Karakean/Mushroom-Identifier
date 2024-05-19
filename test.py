@@ -93,17 +93,79 @@ def ensemble_predictions(models, generator):
     return average_predictions
 
 
+def find_hard_examples(model, generator, threshold=0.75):
+    hard_examples = []
+    steps = generator.samples // generator.batch_size
+    if generator.samples % generator.batch_size != 0:
+        steps += 1
+    for i in range(steps):
+        images, labels = generator[i]
+        predictions = model.predict(images)
+        print(predictions)
+        predicted_classes = np.argmax(predictions, axis=1)
+        true_classes = np.argmax(labels, axis=1)
+        for j in range(len(images)):
+            if predicted_classes[j] != true_classes[j] or np.max(predictions[j]) < threshold:
+                hard_examples.append((images[j], labels[j]))
+        print(f"Processed {i + 1}/{steps} batches")
+
+    return hard_examples
+
+
+def retrain_model_on_hard_examples(model, hard_examples, batch_size=32, epochs=5):
+    if not hard_examples:
+        return model, False
+    hard_images, hard_labels = zip(*hard_examples)
+    hard_images = np.array(hard_images)
+    hard_labels = np.array(hard_labels)
+    model.fit(hard_images, hard_labels, batch_size=batch_size, epochs=epochs)
+    return model, True
+
+
+def make_retraining_plots(loss_before, accuracy_before, loss_after, accuracy_after):
+    fig, ax1 = plt.subplots()
+    ax1.bar(['Before Retraining', 'After Retraining'], [accuracy_before, accuracy_after], color=['blue', 'orange'])
+    ax1.set_ylabel('Accuracy')
+    ax1.set_title('Model Accuracy Before and After Hard Mining and Retraining')
+    plt.show()
+    fig, ax2 = plt.subplots()
+    ax2.bar(['Before Retraining', 'After Retraining'], [loss_before, loss_after], color=['blue', 'orange'])
+    ax2.set_ylabel('Loss')
+    ax2.set_title('Model Loss Before and After Hard Mining and Retraining')
+    plt.show()
+
+
+def hard_example_mining_and_retraining(model_name, data_dir, image_size):
+    train_generator, _, test_generator = load_data(data_dir, image_size)
+    model = tf.keras.models.load_model(model_name)
+    loss_before, accuracy_before = model.evaluate(test_generator)
+    threshold = 0.8
+    hard_examples = find_hard_examples(model, train_generator, threshold)
+    model, is_retrained = retrain_model_on_hard_examples(model, hard_examples)
+    if not is_retrained:
+        print("No hard examples found.")
+        return
+    loss_after, accuracy_after = model.evaluate(test_generator)
+    if accuracy_after > accuracy_before and loss_after < loss_before:
+        model.save(f"retrained_{model_name}")
+    make_retraining_plots(loss_before, accuracy_before, loss_after, accuracy_after)
+
+
 def main():
     splits_dir = 'splits'
     splits = ['split1', 'split2', 'split3']
+    split2_path = "splits/split2"
     image_size = 224
     source_dir = "dataset"
     genuses = [genus for genus in os.listdir(source_dir) if not genus.startswith('.')]
-    test_basic_models(splits_dir, splits, image_size, genuses)
-    _, _, generator = load_data("splits/split2", image_size, shuffle=False)
-    model_ensemble_set = ["MODEL1.keras", "MODEL2.keras", "MODEL3.keras"]
-    test_ensemble_models(model_ensemble_set, genuses, generator)
-    # test_model("test_model.keras", genuses, generator)
+    _, _, generator = load_data(split2_path, image_size, shuffle=False)
+    chosen_model = "MODEL2.keras"
+    ensemble_models_set = ["MODEL1.keras", "MODEL2.keras", "MODEL3.keras"]
+
+    # test_basic_models(splits_dir, splits, image_size, genuses)
+    # test_ensemble_models(ensemble_models_set, genuses, generator)
+    # test_model(chosen_model, genuses, generator)
+    hard_example_mining_and_retraining(chosen_model, split2_path, image_size)
 
 
 if __name__ == "__main__":

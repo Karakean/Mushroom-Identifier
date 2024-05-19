@@ -1,10 +1,9 @@
 import os
 
-
+import matplotlib.pyplot as plt
+import numpy as np
 import tensorflow as tf
 from keras.src.callbacks import ModelCheckpoint
-from keras.src.legacy.preprocessing.image import ImageDataGenerator
-import matplotlib.pyplot as plt
 
 from helpers import load_data
 
@@ -56,20 +55,19 @@ def make_plots(results, name):
     plt.show()
 
 
-def main():
+def train_on_splits():
     base_dir = 'splits'
     splits = ['split1', 'split2', 'split3']
     image_size = 224
     classes_number = 4
     epochs_number = 30
-
     for i, split in enumerate(splits):
         print(f"Training on {split}...")
         data_dir = os.path.join(base_dir, split)
         train_generator, validation_generator, test_generator = load_data(data_dir, image_size)
         model = build_model(image_size, classes_number)
 
-        model_name = f"MODEL{i+1}.keras"
+        model_name = f"MODEL{i + 1}.keras"
         key_metric = 'val_accuracy'
         checkpoint = ModelCheckpoint(model_name, monitor=key_metric, save_best_only=True, mode='max')
         # checkpoint_accuracy = ModelCheckpoint('model_best_accuracy.keras', monitor='accuracy', save_best_only=True,
@@ -83,9 +81,13 @@ def main():
         # result = model.fit(train_generator, validation_data=validation_generator, epochs=epochs_number,
         #                    callbacks=[checkpoint_accuracy, checkpoint_recall, checkpoint_precision, earlystop])
 
-        make_plots(result, f"MODEL{i+1} created from {split}")
+        make_plots(result, f"MODEL{i + 1} created from {split}")
 
-        model.save(f"MODEL{i+1}.keras")
+        model.save(f"MODEL{i + 1}.keras")
+
+
+def main():
+    train_on_splits()
 
 
 if __name__ == "__main__":
