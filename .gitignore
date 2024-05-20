@@ -338,3 +338,12 @@ cython_debug/
 #.idea/
 
 # End of https://www.toptal.com/developers/gitignore/api/pycharm,python,images
+
+.DS_Store
+dataset/*
+small_dataset/*
+other_data/*
+splits/*
+*.keras
+
+!gui/*

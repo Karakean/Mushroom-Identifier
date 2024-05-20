@@ -102,7 +102,7 @@ def generate_pretrained_model(dataset_path, classes_number, image_size, epochs_n
 
 
 def main():
-    dataset_path = 'dataset'
+    dataset_path = '../dataset'
     classes_number = 4
     image_size = 224
     epochs_number = 30

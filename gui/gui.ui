@@ -39,25 +39,6 @@
     <string>Identify</string>
    </property>
   </widget>
-  <widget class="QTextEdit" name="file_path">
-   <property name="geometry">
-    <rect>
-     <x>170</x>
-     <y>570</y>
-     <width>460</width>
-     <height>28</height>
-    </rect>
-   </property>
-   <property name="lineWrapMode">
-    <enum>QTextEdit::NoWrap</enum>
-   </property>
-   <property name="readOnly">
-    <bool>true</bool>
-   </property>
-   <property name="placeholderText">
-    <string>Select image...</string>
-   </property>
-  </widget>
   <widget class="QLabel" name="out_label">
    <property name="geometry">
     <rect>
@@ -118,7 +99,6 @@
   </widget>
   <zorder>select_button</zorder>
   <zorder>identify_button</zorder>
-  <zorder>file_path</zorder>
   <zorder>image_preview</zorder>
   <zorder>out_label</zorder>
   <zorder>shroom_laugh_l</zorder>
